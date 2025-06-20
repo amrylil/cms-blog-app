@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    // ... (opsi-opsi Anda yang lain mungkin sudah ada di sini)
+
+    "target": "es2016",         // Pastikan targetnya modern
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+
+    /* === TAMBAHKAN ATAU PASTIKAN DUA BARIS INI ADA DAN 'true' === */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*"] // Pastikan ini juga ada
+}

@@ -1,0 +1,32 @@
+# Umum
+.DS_Store
+.env
+.env.*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# node_modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# folder build
+dist/
+build/
+
+# cache & temp
+*.tsbuildinfo
+.vscode/
+*.swp
+
+# output
+*.out
+*.log
+
+# IDE/editor
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
