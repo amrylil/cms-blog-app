@@ -1,42 +1,61 @@
-import { IsString, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, IsMongoId, IsArray, IsOptional } from 'class-validator';
 
-// DTO untuk data yang masuk saat membuat post baru
+/**
+ * DTO untuk memvalidasi data yang masuk saat MEMBUAT post baru.
+ * Semua field wajib, kecuali 'tags'.
+ */
 export class CreatePostDto {
-  @IsString({ message: 'Title must be a string' })
-  @IsNotEmpty({ message: 'Title should not be empty' })
+  @IsString()
+  @IsNotEmpty()
   @MinLength(5, { message: 'Title must be at least 5 characters long' })
   title!: string;
 
   @IsString()
   @IsNotEmpty()
   content!: string;
-
-  @IsString()
-  @IsNotEmpty()
+  
+  // Admin akan memilih author dari daftar user, jadi kita butuh ID-nya.
+  @IsMongoId({ message: 'Invalid Author ID format' })
+  @IsNotEmpty({ message: 'Author is required' })
   author!: string;
+
+  // Client akan mengirim ID Kategori dalam bentuk string.
+  @IsMongoId({ message: 'Invalid Category ID format' })
+  @IsNotEmpty({ message: 'Category is required' })
+  category!: string;
+
+  // Tags bersifat opsional. Jika dikirim, harus berupa array berisi MongoID.
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true, message: 'Each tag must be a valid Mongo ID' })
+  tags?: string[];
 }
 
+/**
+ * DTO untuk memvalidasi data yang masuk saat MENGUPDATE post.
+ * Semua field bersifat opsional.
+ */
 export class UpdatePostDto {
-  @IsOptional() // Tandai sebagai opsional
-  @IsString({ message: 'Title must be a string' })
+  @IsOptional()
+  @IsString()
   @MinLength(5, { message: 'Title must be at least 5 characters long' })
-  title?: string; // Tipe juga dibuat opsional dengan '?'
+  title?: string;
 
   @IsOptional()
   @IsString()
   content?: string;
+  
+  // Admin juga bisa mengubah author saat melakukan update.
+  @IsOptional()
+  @IsMongoId({ message: 'Invalid Author ID format' })
+  author?: string;
 
   @IsOptional()
-  @IsString()
-  author?: string;
-}
+  @IsMongoId({ message: 'Invalid Category ID format' })
+  category?: string;
 
-
-export class PostResponseDto {
-  id!: string;
-  title!: string;
-  slug!: string;
-  content!: string;
-  author!: string;
-  createdAt!: Date;
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true, message: 'Each tag must be a valid Mongo ID' })
+  tags?: string[];
 }

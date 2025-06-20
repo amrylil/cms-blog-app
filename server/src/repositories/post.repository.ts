@@ -1,89 +1,94 @@
 import PostModel, { IPost } from '../models/post.model';
+import { UpdatePostDto } from '../dtos/post.dto';
 import slugify from 'slugify';
 
-// Tipe data untuk membuat post baru
-type CreatePostInput = {
+// Tipe data ini mendefinisikan semua field yang dibutuhkan untuk membuat dokumen Post baru.
+// Ini membuat kontrak fungsi 'create' menjadi sangat jelas.
+type PostCreationData = {
   title: string;
+  slug: string;
   content: string;
-  author: string;
-};
-
-// Tipe data untuk mengedit post, semua field bersifat opsional
-type UpdatePostInput = {
-  title?: string;
-  content?: string;
-  author?: string;
+  author: string;   // Ini adalah _id dari User
+  category: string; // Ini adalah _id dari Category
+  tags?: string[];  // Ini adalah array _id dari Tag
+  status?: 'draft' | 'published' | 'scheduled' | 'archived'; // Menambahkan status
+  readTime?: number;
 };
 
 /**
- * Membuat post baru dan menyimpannya ke database.
- * @param postData Data post yang akan dibuat.
+ * Membuat dan menyimpan dokumen Post baru ke database.
+ * @param postData Objek lengkap berisi semua data untuk post baru.
  * @returns Dokumen post yang baru dibuat.
  */
-const create = async (postData: CreatePostInput): Promise<IPost> => {
-  // Membuat slug dari judul saat post dibuat
-  const slug = slugify(postData.title, { lower: true, strict: true });
-
-  const newPost = new PostModel({
-    ...postData,
-    slug: slug, // Simpan slug yang baru dibuat
-  });
-  return await newPost.save();
+const create = async (postData: PostCreationData): Promise<IPost> => {
+  // Tugas repository hanya menerima data yang sudah siap dan menyimpannya.
+  const newPost = new PostModel(postData);
+  return newPost.save();
 };
 
 /**
- * Mencari satu post berdasarkan judulnya.
- * @param title Judul post yang akan dicari.
- * @returns Dokumen post jika ditemukan, atau null.
+ * Mengambil semua post dari database, beserta data relasinya.
+ * @returns Array berisi semua dokumen post.
  */
-const findByTitle = async (title: string): Promise<IPost | null> => {
-  return await PostModel.findOne({ title: title }).exec();
+const findAll = async (): Promise<IPost[]> => {
+  return PostModel.find()
+    .populate('author', 'name email')   // Mengisi data 'author' dengan nama dan email dari model User
+    .populate('category', 'name slug')    // Mengisi data 'category' dengan nama dan slug dari model Category
+    .populate('tags', 'name slug')        // Mengisi data 'tags' dengan nama dan slug dari model Tag
+    .sort({ createdAt: -1 })              // Mengurutkan dari yang terbaru
+    .exec();
 };
 
 /**
- * Mencari satu post berdasarkan slug-nya.
- * @param slug Slug post yang akan dicari.
+ * Mencari satu post berdasarkan slug-nya, beserta data relasinya.
+ * @param slug Slug unik dari post yang akan dicari.
  * @returns Dokumen post jika ditemukan, atau null.
  */
 const findBySlug = async (slug: string): Promise<IPost | null> => {
-  return await PostModel.findOne({ slug: slug }).exec();
+  return PostModel.findOne({ slug })
+    .populate('author', 'name email')
+    .populate('category', 'name slug')
+    .populate('tags', 'name slug')
+    .exec();
+};
+
+const incrementCommentCount = async (postId: string): Promise<void> => {
+  // Gunakan $inc untuk operasi atomik yang efisien
+  await PostModel.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
 };
 
 /**
- * Mengedit/memperbarui post berdasarkan slug-nya.
- * @param slug Slug dari post yang akan di-update.
+ * Mengupdate satu post berdasarkan slug-nya.
+ * @param slug Slug unik dari post yang akan diupdate.
  * @param updateData Data baru untuk post.
- * @returns Dokumen post yang sudah di-update, atau null jika tidak ditemukan.
+ * @returns Dokumen post yang sudah diupdate, atau null jika tidak ditemukan.
  */
-const update = async (slug: string, updateData: UpdatePostInput): Promise<IPost | null> => {
+const updateBySlug = async (slug: string, updateData: UpdatePostDto): Promise<IPost | null> => {
+  // Karena repository yang paling tahu tentang field,
+  // maka logis jika logika update slug diletakkan di sini.
   const updatePayload: any = { ...updateData };
-
-  // Jika judul di-update, buat ulang slug-nya juga
   if (updateData.title) {
     updatePayload.slug = slugify(updateData.title, { lower: true, strict: true });
   }
 
-  // Cari dan update post. Opsi { new: true } akan mengembalikan dokumen yang sudah di-update.
-  return await PostModel.findOneAndUpdate({ slug: slug }, updatePayload, {
-    new: true,
-  }).exec();
+  // Cari dan update. Opsi { new: true } akan mengembalikan dokumen versi baru setelah diupdate.
+  return PostModel.findOneAndUpdate({ slug }, updatePayload, { new: true }).exec();
 };
 
 /**
- * Menghapus sebuah post berdasarkan slug-nya.
- * @param slug Slug dari post yang akan dihapus.
+ * Menghapus satu post berdasarkan slug-nya.
+ * @param slug Slug unik dari post yang akan dihapus.
  * @returns Dokumen post yang dihapus, atau null jika tidak ditemukan.
  */
-const remove = async (slug: string): Promise<IPost | null> => {
-  // Cari dan hapus post berdasarkan slug-nya
-  return await PostModel.findOneAndDelete({ slug: slug }).exec();
+const deleteBySlug = async (slug: string): Promise<IPost | null> => {
+  return PostModel.findOneAndDelete({ slug }).exec();
 };
-
 
 export default {
   create,
-  findByTitle,
+  findAll,
   findBySlug,
-  update, // <-- Tambahkan fungsi update
-  remove, // <-- Tambahkan fungsi remove
+  updateBySlug,
+  incrementCommentCount,
+  deleteBySlug,
 };

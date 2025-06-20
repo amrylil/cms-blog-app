@@ -4,15 +4,19 @@ import { Request, Response, NextFunction } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { CreatePostDto, UpdatePostDto } from '../dtos/post.dto';
-import postService from '../services/post.service'; // Pastikan path ini benar
+import postService from '../services/post.service';
 
+/**
+ * Handler untuk membuat post baru.
+ * Menerima data lengkap (termasuk author) dari Admin.
+ */
 export const createPostHandler = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // 1. Validasi body request menggunakan DTO (tanpa slug)
+    // 1. Validasi body request menggunakan DTO yang sudah lengkap
     const createPostDto = plainToInstance(CreatePostDto, req.body);
     const errors = await validate(createPostDto);
 
@@ -23,33 +27,41 @@ export const createPostHandler = async (
       });
     }
     
-    // --- PERUBAHAN DI SINI ---
-    // 2. Panggil 'postService.create', yang sekarang akan membuat slug secara internal
-    const newPost = await postService.create(createPostDto);
+    // 2. Langsung panggil service dengan DTO.
+    // Logika validasi author, kategori, dll. sudah ditangani di dalam service.
+    const newPost = await postService.createPost(createPostDto);
     
-    // 3. Kirim response sukses dengan data post yang lengkap (termasuk slug)
+    // 3. Kirim response sukses
     return res.status(201).json({
       message: 'Post created successfully',
       data: newPost,
     });
     
   } catch (error: any) {
-    // 4. Tangkap error dari service (misal, 'title already exists')
-    if (error.message === 'A post with this title already exists.') {
+    // 4. Tangani error spesifik dari service
+    if (
+      error.message === 'A post with this title already exists.' ||
+      error.message === 'Author not found.' ||
+      error.message === 'Category not found.' ||
+      error.message === 'One or more tags not found.'
+    ) {
       return res.status(400).json({ message: error.message });
     }
-    // Untuk error lainnya, lempar ke middleware penangan error
+    // Untuk error lainnya, lempar ke middleware penangan error pusat
     return next(error);
   }
 };
 
+/**
+ * Handler untuk mengambil semua post.
+ */
 export const getAllPostsHandler = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const posts = await postService.findAll();
+    const posts = await postService.findAllPosts();
     return res.status(200).json({
       message: 'Posts fetched successfully',
       data: posts,
@@ -59,6 +71,9 @@ export const getAllPostsHandler = async (
   }
 };
 
+/**
+ * Handler untuk mengambil satu post berdasarkan slug.
+ */
 export const getPostHandler = async (
   req: Request,
   res: Response,
@@ -66,7 +81,7 @@ export const getPostHandler = async (
 ) => {
   try {
     const { slug } = req.params;
-    const post = await postService.findBySlug(slug);
+    const post = await postService.findPostBySlug(slug);
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
@@ -81,6 +96,9 @@ export const getPostHandler = async (
   }
 };
 
+/**
+ * Handler untuk mengupdate post berdasarkan slug.
+ */
 export const updatePostHandler = async (
   req: Request,
   res: Response,
@@ -98,7 +116,7 @@ export const updatePostHandler = async (
       });
     }
 
-    const updatedPost = await postService.update(slug, updatePostDto);
+    const updatedPost = await postService.updatePost(slug, updatePostDto);
 
     if (!updatedPost) {
       return res.status(404).json({ message: 'Post not found' });
@@ -116,6 +134,9 @@ export const updatePostHandler = async (
   }
 };
 
+/**
+ * Handler untuk menghapus post berdasarkan slug.
+ */
 export const deletePostHandler = async (
   req: Request,
   res: Response,
@@ -123,7 +144,7 @@ export const deletePostHandler = async (
 ) => {
   try {
     const { slug } = req.params;
-    const deletedPost = await postService.remove(slug);
+    const deletedPost = await postService.deletePost(slug);
 
     if (!deletedPost) {
       return res.status(404).json({ message: 'Post not found' });
@@ -131,7 +152,6 @@ export const deletePostHandler = async (
 
     return res.status(200).json({
       message: 'Post deleted successfully',
-      data: deletedPost,
     });
   } catch (error: any) {
     return next(error);
