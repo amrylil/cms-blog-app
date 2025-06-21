@@ -58,59 +58,69 @@ Content Management System (CMS) untuk blog yang dikembangkan menggunakan stack M
 1. Clone repository
 ```bash
 git clone [repository-url]
-cd cms-blog-kelompok4
+cd my-cms-blog
 ```
 
-2. Install dependencies
+2. Install semua dependencies sekaligus
 ```bash
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
+npm run install:all
 ```
+*Script ini akan menginstall dependencies untuk root project, client, dan server*
 
 3. Setup environment variables
 ```bash
-# Di folder backend, buat file .env
+# Di folder server, buat file .env
+cd server
 cp .env.example .env
-# Edit file .env sesuai konfigurasi Anda
+# Edit file .env sesuai konfigurasi database MongoDB Anda
 ```
 
-4. Jalankan aplikasi
+4. Jalankan aplikasi (development mode)
 ```bash
-# Jalankan backend
-cd backend
-npm run dev
+# Kembali ke root directory
+cd ..
 
-# Jalankan frontend (terminal baru)
-cd frontend
-npm start
+# Jalankan client dan server bersamaan
+npm run dev
 ```
+
+### Script yang Tersedia
+
+- `npm run dev` - Menjalankan client dan server secara bersamaan
+- `npm run client` - Menjalankan hanya client (frontend)
+- `npm run server` - Menjalankan hanya server (backend)
+- `npm run install:all` - Install dependencies untuk semua bagian proyek
 
 ## 📁 Struktur Proyek
 
 ```
-cms-blog-kelompok4/
+my-cms-blog/
 │
-├── backend/
+├── client/                 # Frontend (React)
 │   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   └── middleware/
+│   ├── public/
 │   └── package.json
 │
-├── frontend/
+├── server/                 # Backend (Express.js)
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── utils/
+│   │   ├── config/        # Konfigurasi database
+│   │   ├── controllers/   # Logic bisnis
+│   │   ├── dtos/          # Data Transfer Objects
+│   │   ├── middleware/    # Middleware Express
+│   │   ├── models/        # Model database
+│   │   ├── repositories/  # Layer akses data
+│   │   ├── routes/        # Route definitions
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── category.routes.ts
+│   │   │   ├── comment.routes.ts
+│   │   │   ├── post.routes.ts
+│   │   │   └── tag.routes.ts
+│   │   └── services/      # Service layer
+│   ├── node_modules/
 │   └── package.json
 │
+├── package.json           # Root package.json
+├── .gitignore
 └── README.md
 ```
 
