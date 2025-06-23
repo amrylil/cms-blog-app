@@ -4,7 +4,6 @@ import { IUser } from './user.model';
 import { ICategory } from './category.model';
 import { ITag } from './tag.model';
 
-// Interface final untuk Post, mencakup semua properti
 export interface IPost extends Document {
   title: string;
   slug: string;

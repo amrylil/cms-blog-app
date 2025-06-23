@@ -8,14 +8,9 @@
 
 Proyek ini dibangun oleh **Kelompok 4**, yang terdiri dari:
 
-| NIM | Nama Lengkap |
-|-----|--------------|
-| 222278 | **Muh. Rezky Ramadhana** |
-| 222283 | **Siti Fatimah Azzahra** |
-| 222277 | **Ulil Amry Al Qadri** |
-| 222280 | **Abdullah Amar Azzikra** |
-| 222264 | **M. Habil Azzikri** |
-| 222308 | **Nur Afifah Najwa** |
+| NIM    | Nama Lengkap          |
+| ------ | --------------------- |
+| 222279 | **Riswanda Alfarizi** |
 
 ---
 
@@ -49,6 +44,7 @@ Content Management System (CMS) untuk blog yang dikembangkan menggunakan stack M
 ## 🚀 Instalasi dan Penggunaan
 
 ### Prerequisites
+
 - Node.js (v14 atau lebih baru)
 - MongoDB
 - npm atau yarn
@@ -56,18 +52,22 @@ Content Management System (CMS) untuk blog yang dikembangkan menggunakan stack M
 ### Langkah Instalasi
 
 1. Clone repository
+
 ```bash
 git clone [repository-url]
 cd my-cms-blog
 ```
 
 2. Install semua dependencies sekaligus
+
 ```bash
 npm run install:all
 ```
-*Script ini akan menginstall dependencies untuk root project, client, dan server*
+
+_Script ini akan menginstall dependencies untuk root project, client, dan server_
 
 3. Setup environment variables
+
 ```bash
 # Di folder server, buat file .env
 cd server
@@ -76,6 +76,7 @@ cp .env.example .env
 ```
 
 4. Jalankan aplikasi (development mode)
+
 ```bash
 # Kembali ke root directory
 cd ..

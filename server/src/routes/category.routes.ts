@@ -1,5 +1,4 @@
 import { Router } from 'express';
-// import { protect } from '../middleware/auth.middleware';
 import { 
     createCategoryHandler,
     getAllCategoriesHandler,
@@ -10,7 +9,6 @@ import {
 
 const router = Router();
 
-// Rute Publik (siapa saja bisa melihat)
 router.get('/', getAllCategoriesHandler);
 router.get('/:id', getCategoryByIdHandler);
 
