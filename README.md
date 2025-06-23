@@ -6,7 +6,7 @@
 
 ## 👨‍💻 Tim Pengembang
 
-Proyek ini dibangun oleh **Kelompok 4**, yang terdiri dari:
+Proyek ini dibangun oleh **Kelompok 8**, yang terdiri dari:
 
 | NIM    | Nama Lengkap          |
 | ------ | --------------------- |
